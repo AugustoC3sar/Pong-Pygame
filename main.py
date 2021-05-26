@@ -165,7 +165,6 @@ def newDirection():
     enable = 1
 
 
-
 def resetGame():
     global canvas
     global p1_position,p2_position
