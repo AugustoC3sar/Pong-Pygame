@@ -9,6 +9,7 @@ root = Tk()
 root.title('PONG')
 
 #defining
+gameStopTime = 0.06
 p1_score = 0
 p2_score = 0
 p1_position = [10,170,30,250]
@@ -75,6 +76,7 @@ def verifyBallColisions():
     global p1_position,p2_position
     global p1_score,p2_score
     global move_direction
+    global gameStopTime
     bx1,by1,bx2,by2 = ball_position
     p1x1,p1y1,p1x2,p1y2 = p1_position
     p2x1,p2y1,p2x2,p2y2 = p2_position
@@ -89,6 +91,7 @@ def verifyBallColisions():
                 move_direction = 'TL'
             elif move_direction == 'DR':
                 move_direction = 'DL'
+        gameStopTime = gameStopTime - 0.0005
     elif by2 == 420:
         if move_direction == 'DL':
             move_direction = 'TL'
@@ -100,6 +103,7 @@ def verifyBallColisions():
                 move_direction = 'TR'
             elif move_direction == 'DL':
                 move_direction = 'DR'
+            gameStopTime = gameStopTime - 0.0005
     elif bx1 == 600:
         p1_score += 1
         updateScores()
@@ -113,9 +117,10 @@ def ballMove():
     global ball_position
     global canvas
     global enable
+    global gameStopTime
     while True:
         if enable == 1:
-            time.sleep(0.1)
+            time.sleep(gameStopTime)
             if move_direction == 'TR':
                 canvas.move(ball,10,-10)
             elif move_direction == 'DR':
@@ -161,6 +166,8 @@ def updateScores():
 def newDirection():
     global move_direction
     global enable
+    global gameStopTime
+    gameStopTime = 0.06
     move_direction = random.choice(directions)
     enable = 1
 
