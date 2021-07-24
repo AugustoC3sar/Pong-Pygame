@@ -5,7 +5,7 @@ import random
 
 pygame.font.init()
 
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 700, 500
 FPS = 60
 PLAYER_WIDTH = 20
 PLAYER_HEIGHT = 80
@@ -26,41 +26,49 @@ class Engine:
         self.__root = pygame.display.set_mode((WIDTH, HEIGHT))
         self.__collisions = 0
         self.__run = True
-        self.__end = False
+        self.__end = True
         self.__goal = False
+        self.__winner = 'NONE'
+        self.__mouse_pos = (0,0)
 
     def game_loop(self):
         clock = pygame.time.Clock()
+        self.__root.fill(BLACK)
+        self.draw_all()
+        pygame.display.update()
+        pygame.time.delay(2000)
         while self.__run:
             clock.tick(FPS)
             self.__root.fill(BLACK)
             if self.__end:
-                pass
+                self.end_game_screen()
             else:
-                self.draw_ball()
-                self.draw_players()
-                self.draw_line()
-                self.draw_scores()
+                self.draw_all()
                 self.get_key()
                 self.__ball.move()
                 self.check_collisions()
-                self.check_goal()
                 if self.__goal:
                     self.reset_positions()
                     self.__root.fill(BLACK)
-                    self.draw_ball()
-                    self.draw_players()
-                    self.draw_line()
-                    self.draw_scores()
+                    self.draw_all()
                     pygame.display.update()
                     self.__goal = False
                     pygame.time.delay(2000)
+                self.check_goal()
 
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.__run = False
+                elif event.type == MOUSEBUTTONDOWN:
+                    self.__mouse_pos = pygame.mouse.get_pos()
             
             pygame.display.update()
+
+    def draw_all(self):
+        self.draw_ball()
+        self.draw_players()
+        self.draw_line()
+        self.draw_scores()
 
     def draw_players(self):
         pygame.draw.rect(self.__root, WHITE, self.__player1.hitbox)
@@ -92,7 +100,7 @@ class Engine:
             else:
                 self.__ball.direction = 'BOTTOM-LEFT'
             self.__collisions += 1
-        if self.__collisions == 10:
+        if self.__collisions == 5:
             self.__collisions = 0
             game_speed += 0.5
 
@@ -103,6 +111,33 @@ class Engine:
         if self.__ball.x + BALL_DIMENSION < 0:
             self.__player2.score += 1
             self.__goal = True
+        self.check_end_game()
+
+    def check_end_game(self):
+        if self.__player1.score == 5:
+            self.__end = True
+            self.__winner = 'Player 1'
+        if self.__player2.score == 5:
+            self.__end = True
+            self.__winner = 'Player 2'
+
+    def end_game_screen(self):
+        winner_msg = MAIN_FONT.render(f'Winner: {self.__winner}!',False,(255,255,255))
+        winner_rect = winner_msg.get_rect(center=((WIDTH/2),(HEIGHT/2)-50))
+        play_again = MAIN_FONT.render('Play Again?',False,(255,255,255))
+        play_again_rect = play_again.get_rect(center=((WIDTH/2),(HEIGHT/2)))
+        yes = MAIN_FONT.render('YES', False, (255,255,255))
+        yes_rect = yes.get_rect(center=((WIDTH/2)-50, (HEIGHT/2)+50))
+        no = MAIN_FONT.render('NO',False,(255,255,255))
+        no_rect = no.get_rect(center=((WIDTH/2)+50, (HEIGHT/2)+50))
+        self.__root.blit(winner_msg, winner_rect)
+        self.__root.blit(play_again, play_again_rect)
+        self.__root.blit(yes, yes_rect)
+        self.__root.blit(no, no_rect)
+        if no_rect.collidepoint(self.__mouse_pos):
+            self.__run = False
+        elif yes_rect.collidepoint(self.__mouse_pos):
+            pass
 
     def reset_positions(self):
         self.__ball.reset_position()
@@ -213,29 +248,31 @@ class Ball:
         if self.__direction == 'TOP-RIGHT':
             self.__x += game_speed
             self.__y -= game_speed
-            if self.__y == 0:
+            if self.__y <= 0:
                 self.__direction = 'BOTTOM-RIGHT'
-        elif self.__direction == 'BOTTOM-RIGHT':
+        if self.__direction == 'BOTTOM-RIGHT':
             self.__x += game_speed
             self.__y += game_speed
-            if self.__y == HEIGHT-BALL_DIMENSION:
+            if self.__y >= HEIGHT-BALL_DIMENSION:
                 self.__direction = 'TOP-RIGHT'
-        elif self.__direction == 'TOP-LEFT':
+        if self.__direction == 'TOP-LEFT':
             self.__x -= game_speed
             self.__y -= game_speed
-            if self.__y == 0:
+            if self.__y <= 0:
                 self.__direction = 'BOTTOM-LEFT'
-        else:
+        if self.__direction == 'BOTTOM-LEFT':
             self.__x -= game_speed
             self.__y += game_speed
-            if self.__y == HEIGHT-BALL_DIMENSION:
+            if self.__y >= HEIGHT-BALL_DIMENSION:
                 self.__direction = 'TOP-LEFT'
         self.update_hitbox()
 
     def reset_position(self):
+        global game_speed
         self.__x = WIDTH/2 - BALL_DIMENSION/2
         self.__y = HEIGHT/2 - BALL_DIMENSION/2
         self.__direction = random.choice(DIRECTIONS)
+        game_speed = 3
         self.update_hitbox()
 
 
