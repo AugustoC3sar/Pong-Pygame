@@ -26,7 +26,7 @@ class Engine:
         self.__root = pygame.display.set_mode((WIDTH, HEIGHT))
         self.__collisions = 0
         self.__run = True
-        self.__end = True
+        self.__end = False
         self.__goal = False
         self.__winner = 'NONE'
         self.__mouse_pos = (0,0)
@@ -137,13 +137,26 @@ class Engine:
         if no_rect.collidepoint(self.__mouse_pos):
             self.__run = False
         elif yes_rect.collidepoint(self.__mouse_pos):
-            pass
+            self.__end = False
+            self.reset_game()
 
     def reset_positions(self):
+        global game_speed
         self.__ball.reset_position()
         self.__player1.reset_position()
         self.__player2.reset_position()
+        game_speed = 3
+        self.__collisions = 0
 
+    def reset_game(self):
+        self.reset_positions()
+        self.__player1.score = 0
+        self.__player2.score = 0
+        self.__root.fill(BLACK)
+        self.draw_all()
+        self.__mouse_pos = (0,0)
+        pygame.display.update()
+        pygame.time.delay(2000)
 
     def get_key(self):
         keys = pygame.key.get_pressed()
@@ -268,11 +281,9 @@ class Ball:
         self.update_hitbox()
 
     def reset_position(self):
-        global game_speed
         self.__x = WIDTH/2 - BALL_DIMENSION/2
         self.__y = HEIGHT/2 - BALL_DIMENSION/2
         self.__direction = random.choice(DIRECTIONS)
-        game_speed = 3
         self.update_hitbox()
 
 
