@@ -3,6 +3,8 @@ from pygame.constants import *
 import random
 
 
+pygame.font.init()
+
 WIDTH, HEIGHT = 900, 500
 FPS = 60
 PLAYER_WIDTH = 20
@@ -12,6 +14,7 @@ MOVE_VEL = 5
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 DIRECTIONS = ('TOP-RIGHT','BOTTOM-RIGHT','TOP-LEFT','BOTTOM-LEFT')
+MAIN_FONT = pygame.font.SysFont('Helvetica', 30)
 game_speed = 3
 
 
@@ -35,6 +38,7 @@ class Engine:
                 self.draw_ball()
                 self.draw_players()
                 self.draw_line()
+                self.draw_scores()
                 self.get_key()
                 self.__ball.move()
 
@@ -53,6 +57,12 @@ class Engine:
 
     def draw_line(self):
         pygame.draw.line(self.__root, WHITE, (WIDTH/2,0), (WIDTH/2,HEIGHT), 1)
+
+    def draw_scores(self):
+        player1 = MAIN_FONT.render(f'{self.__player1.score}', False, WHITE)
+        player2 = MAIN_FONT.render(f'{self.__player2.score}', False, WHITE)
+        self.__root.blit(player1, ((WIDTH/2)-30, 5))
+        self.__root.blit(player2, ((WIDTH/2)+15, 5))
 
     def get_key(self):
         keys = pygame.key.get_pressed()
