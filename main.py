@@ -24,6 +24,7 @@ class Engine:
         self.__player2 = Player(WIDTH-PLAYER_WIDTH-10)
         self.__ball = Ball()
         self.__root = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.__collisions = 0
         self.__run = True
         self.__end = False
 
@@ -41,6 +42,7 @@ class Engine:
                 self.draw_scores()
                 self.get_key()
                 self.__ball.move()
+                self.check_collisions()
 
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -56,13 +58,31 @@ class Engine:
         pygame.draw.rect(self.__root, WHITE, self.__ball.hitbox)
 
     def draw_line(self):
-        pygame.draw.line(self.__root, WHITE, (WIDTH/2,0), (WIDTH/2,HEIGHT), 1)
+        pygame.draw.line(self.__root, WHITE, (WIDTH/2,0), (WIDTH/2,HEIGHT))
 
     def draw_scores(self):
         player1 = MAIN_FONT.render(f'{self.__player1.score}', False, WHITE)
         player2 = MAIN_FONT.render(f'{self.__player2.score}', False, WHITE)
         self.__root.blit(player1, ((WIDTH/2)-30, 5))
         self.__root.blit(player2, ((WIDTH/2)+15, 5))
+
+    def check_collisions(self):
+        global game_speed
+        if self.__player1.hitbox.colliderect(self.__ball.hitbox):
+            if self.__ball.direction == 'TOP-LEFT':
+                self.__ball.direction = 'TOP-RIGHT'
+            else:
+                self.__ball.direction = 'BOTTOM-RIGHT'
+            self.__collisions += 1
+        if self.__player2.hitbox.colliderect(self.__ball.hitbox):
+            if self.__ball.direction == 'TOP-RIGHT':
+                self.__ball.direction = 'TOP-LEFT'
+            else:
+                self.__ball.direction = 'BOTTOM-LEFT'
+            self.__collisions += 1
+        if self.__collisions == 5:
+            self.__collisions = 0
+            game_speed += 0.1
 
     def get_key(self):
         keys = pygame.key.get_pressed()
@@ -74,6 +94,7 @@ class Engine:
             self.__player2.move_up()
         elif keys[K_DOWN]:
             self.__player2.move_down()
+
 
 class Player:
     def __init__(self, x):
@@ -146,6 +167,10 @@ class Ball:
     @property
     def direction(self):
         return self.__direction
+
+    @direction.setter
+    def direction(self, new_dir):
+        self.__direction = new_dir
 
     @property
     def hitbox(self):
