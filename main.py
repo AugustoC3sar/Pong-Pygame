@@ -27,6 +27,7 @@ class Engine:
         self.__collisions = 0
         self.__run = True
         self.__end = False
+        self.__goal = False
 
     def game_loop(self):
         clock = pygame.time.Clock()
@@ -43,6 +44,17 @@ class Engine:
                 self.get_key()
                 self.__ball.move()
                 self.check_collisions()
+                self.check_goal()
+                if self.__goal:
+                    self.reset_positions()
+                    self.__root.fill(BLACK)
+                    self.draw_ball()
+                    self.draw_players()
+                    self.draw_line()
+                    self.draw_scores()
+                    pygame.display.update()
+                    self.__goal = False
+                    pygame.time.delay(2000)
 
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -80,9 +92,23 @@ class Engine:
             else:
                 self.__ball.direction = 'BOTTOM-LEFT'
             self.__collisions += 1
-        if self.__collisions == 5:
+        if self.__collisions == 10:
             self.__collisions = 0
-            game_speed += 0.1
+            game_speed += 0.5
+
+    def check_goal(self):
+        if self.__ball.x > WIDTH:
+            self.__player1.score += 1
+            self.__goal = True
+        if self.__ball.x + BALL_DIMENSION < 0:
+            self.__player2.score += 1
+            self.__goal = True
+
+    def reset_positions(self):
+        self.__ball.reset_position()
+        self.__player1.reset_position()
+        self.__player2.reset_position()
+
 
     def get_key(self):
         keys = pygame.key.get_pressed()
@@ -139,6 +165,10 @@ class Player:
         if self.__y < HEIGHT-PLAYER_HEIGHT-10:
             self.__y += MOVE_VEL
             self.update_hitbox()
+
+    def reset_position(self):
+        self.__y = HEIGHT/2 - PLAYER_HEIGHT/2
+        self.update_hitbox()
 
 
 class Ball:
@@ -200,6 +230,12 @@ class Ball:
             self.__y += game_speed
             if self.__y == HEIGHT-BALL_DIMENSION:
                 self.__direction = 'TOP-LEFT'
+        self.update_hitbox()
+
+    def reset_position(self):
+        self.__x = WIDTH/2 - BALL_DIMENSION/2
+        self.__y = HEIGHT/2 - BALL_DIMENSION/2
+        self.__direction = random.choice(DIRECTIONS)
         self.update_hitbox()
 
 
