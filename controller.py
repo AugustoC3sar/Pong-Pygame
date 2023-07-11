@@ -48,6 +48,13 @@ class Controller:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self._running = False
+                if event.type == KEYDOWN:
+                    if pygame.key.get_pressed()[K_p]:
+                        if self._paused:
+                            self.unpause()
+                        else:
+                            self.pause()
+
 
     def keyboard_input(self):
         keys = pygame.key.get_pressed()
@@ -61,11 +68,6 @@ class Controller:
                     self._player2.move_up()
                 elif keys[K_DOWN]:
                     self._player2.move_down()
-                if keys[K_p]:
-                    self.pause()
-            else:
-                if keys[K_p]:
-                    self.unpause()
         else:
             if keys[K_q]:
                 exit(1)
